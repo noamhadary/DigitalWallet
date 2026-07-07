@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext'
 import { Barcode } from '../components/Barcode'
 import { BarcodeScanner } from '../components/BarcodeScanner'
+import { FlipCard } from '../components/FlipCard'
 import { getCardTypeMeta } from '../lib/types'
 import { formatCardNumber } from '../lib/validators'
 
@@ -72,23 +73,18 @@ export function CardDetailPage() {
         </div>
       </header>
 
-      {/* תמונות הכרטיס שצולמו — חזית וגב */}
-      {(card.imageData || card.imageBackData) && (
+      {/* תמונות הכרטיס שצולמו */}
+      {card.imageData && card.imageBackData ? (
+        /* שתי תמונות — כרטיס מתהפך */
+        <FlipCard front={card.imageData} back={card.imageBackData} alt={card.title} />
+      ) : card.imageData || card.imageBackData ? (
+        /* תמונה אחת — תצוגה רגילה */
         <div className="detail__photos">
-          {card.imageData && (
-            <figure className="detail__photo">
-              <img src={card.imageData} alt={`חזית ${card.title}`} />
-              {card.imageBackData && <figcaption>חזית</figcaption>}
-            </figure>
-          )}
-          {card.imageBackData && (
-            <figure className="detail__photo">
-              <img src={card.imageBackData} alt={`גב ${card.title}`} />
-              {card.imageData && <figcaption>גב</figcaption>}
-            </figure>
-          )}
+          <figure className="detail__photo">
+            <img src={(card.imageData ?? card.imageBackData) as string} alt={card.title} />
+          </figure>
         </div>
-      )}
+      ) : null}
 
       {/* תצוגת הכרטיס */}
       <div
