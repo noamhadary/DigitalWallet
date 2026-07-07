@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
@@ -10,8 +10,16 @@ export function WalletPage() {
   const { cards, loading, error } = useWallet()
   const { resolved, setPref } = useTheme()
   const { avatarUrl, name, email } = useAuth()
+  const navigate = useNavigate()
   const [filter, setFilter] = useState<CardType | 'all'>('all')
   const [query, setQuery] = useState('')
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  // לחיצה ראשונה — הכרטיס בולט מהתא; לחיצה שנייה על אותו כרטיס — פתיחה מלאה
+  function handleCardClick(id: string) {
+    if (openId === id) navigate(`/card/${id}`)
+    else setOpenId(id)
+  }
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -98,11 +106,36 @@ export function WalletPage() {
         <div className="empty">לא נמצאו כרטיסים תואמים</div>
       )}
 
-      <div className="card-grid">
-        {visible.map((card) => (
-          <CardTile key={card.id} card={card} />
-        ))}
-      </div>
+      {visible.length > 0 && (
+        <div className="wallet-stack" onClick={() => setOpenId(null)}>
+          {visible.map((card, i) => {
+            const isOpen = openId === card.id
+            return (
+              <div
+                key={card.id}
+                className={`wallet-slot ${isOpen ? 'is-open' : ''}`}
+                style={{ zIndex: isOpen ? 100 : i + 1 }}
+                role="button"
+                tabIndex={0}
+                aria-label={`${card.title}${isOpen ? ' — הקש לפתיחה' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleCardClick(card.id)
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    handleCardClick(card.id)
+                  }
+                }}
+              >
+                <CardTile card={card} />
+                {isOpen && <span className="wallet-slot__hint">הקש שוב לפתיחה</span>}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }

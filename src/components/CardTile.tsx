@@ -1,16 +1,14 @@
-import { Link } from 'react-router-dom'
 import type { WalletCard } from '../lib/types'
 import { getCardTypeMeta } from '../lib/types'
 import { formatCardNumber } from '../lib/validators'
 
-/** משטח כרטיס בסגנון כרטיס מגנטי — נועד לתצוגת רשימת הארנק */
+/** משטח כרטיס בסגנון כרטיס מגנטי — תצוגה בלבד; הלחיצה מטופלת ע"י המכל (התא בארנק) */
 export function CardTile({ card }: { card: WalletCard }) {
   const meta = getCardTypeMeta(card.type)
   const number = card.type === 'id' ? card.details.idNumber : card.cardNumber
 
   return (
-    <Link
-      to={`/card/${card.id}`}
+    <div
       className={`card-tile ${card.imageData ? 'card-tile--photo' : ''}`}
       style={
         card.imageData
@@ -37,7 +35,7 @@ export function CardTile({ card }: { card: WalletCard }) {
         {card.holderName && <span>{card.holderName}</span>}
         {card.issuer && <span className="card-tile__issuer">{card.issuer}</span>}
       </div>
-    </Link>
+    </div>
   )
 }
 

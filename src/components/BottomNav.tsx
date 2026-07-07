@@ -1,7 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom'
+import type { ReactNode } from 'react'
+import { WalletIcon } from './WalletIcon'
 
-const items = [
-  { to: '/', label: 'הארנק', icon: '👛', exact: true },
+const items: { to: string; label: string; icon: ReactNode; exact: boolean }[] = [
+  { to: '/', label: 'הארנק', icon: <WalletIcon size={24} />, exact: true },
   { to: '/add', label: 'הוספה', icon: '＋', exact: false },
   { to: '/settings', label: 'הגדרות', icon: '⚙️', exact: false },
 ]

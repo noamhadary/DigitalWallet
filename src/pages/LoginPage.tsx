@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { WalletIcon } from '../components/WalletIcon'
 
 export function LoginPage() {
   const { signIn, signUp, signInWithGoogle } = useAuth()
@@ -45,7 +46,9 @@ export function LoginPage() {
   return (
     <div className="auth">
       <div className="auth__brand">
-        <div className="auth__logo" aria-hidden>👛</div>
+        <div className="auth__logo" aria-hidden>
+          <WalletIcon size={52} />
+        </div>
         <h1>הארנק הדיגיטלי</h1>
         <p>כל הכרטיסים שלך במקום אחד — תעודת זהות, רשיון נהיגה וכרטיסים מגנטיים.</p>
       </div>
