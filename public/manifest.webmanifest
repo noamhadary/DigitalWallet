@@ -1,0 +1,15 @@
+{
+  "name": "ארנק דיגיטלי",
+  "short_name": "הארנק שלי",
+  "description": "אחסון והצגת כרטיסים מגנטיים, תעודת זהות ורשיון נהיגה",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf9f8",
+  "theme_color": "#595f63",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/wallet.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
