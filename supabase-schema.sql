@@ -7,7 +7,7 @@
 create table if not exists public.cards (
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid not null references auth.users (id) on delete cascade,
-  type         text not null default 'membership',   -- id | license | membership | credit | transit | health | other
+  type         text not null default 'membership',   -- id | license | membership | credit | gift | transit | health | other
   title        text not null,
   issuer       text,
   holder_name  text,

@@ -3,6 +3,7 @@ export type CardType =
   | 'license'
   | 'membership'
   | 'credit'
+  | 'gift'
   | 'transit'
   | 'health'
   | 'other'
@@ -87,6 +88,17 @@ export const CARD_TYPES: CardTypeMeta[] = [
     fields: [
       { key: 'expiry', label: 'תוקף', placeholder: 'MM/YY' },
       { key: 'network', label: 'רשת', placeholder: 'Visa / Mastercard' },
+    ],
+  },
+  {
+    type: 'gift',
+    label: 'גיפט קארד',
+    icon: '🎁',
+    color: '#8a4b4b',
+    fields: [
+      { key: 'balance', label: 'יתרה' },
+      { key: 'pin', label: 'קוד / PIN' },
+      { key: 'validUntil', label: 'בתוקף עד', placeholder: 'DD/MM/YYYY' },
     ],
   },
   {
