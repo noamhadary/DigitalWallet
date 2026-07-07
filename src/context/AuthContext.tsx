@@ -1,10 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from '../lib/supabase'
 
 interface AuthState {
   ready: boolean
   usingCloud: boolean
   email: string | null
+  /** שם התצוגה מחשבון ההתחברות (למשל מ־Google) */
+  name: string | null
+  /** תמונת הפרופיל מחשבון ההתחברות (למשל מ־Google) */
+  avatarUrl: string | null
   isAuthenticated: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
@@ -14,9 +19,21 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null)
 
+/** שולף שם + תמונת פרופיל מתוך ה־user_metadata (Google מספק avatar_url/picture) */
+function profileFrom(user: User | null | undefined) {
+  const meta = user?.user_metadata ?? {}
+  return {
+    email: user?.email ?? null,
+    name: (meta.full_name as string) ?? (meta.name as string) ?? null,
+    avatarUrl: (meta.avatar_url as string) ?? (meta.picture as string) ?? null,
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
   const [email, setEmail] = useState<string | null>(null)
+  const [name, setName] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (!supabase) {
@@ -24,12 +41,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setReady(true)
       return
     }
+    const apply = (user: User | null | undefined) => {
+      const p = profileFrom(user)
+      setEmail(p.email)
+      setName(p.name)
+      setAvatarUrl(p.avatarUrl)
+    }
     supabase.auth.getSession().then(({ data }) => {
-      setEmail(data.session?.user.email ?? null)
+      apply(data.session?.user)
       setReady(true)
     })
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setEmail(session?.user.email ?? null)
+      apply(session?.user)
     })
     return () => sub.subscription.unsubscribe()
   }, [])
@@ -39,6 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ready,
       usingCloud: isSupabaseConfigured,
       email,
+      name,
+      avatarUrl,
       isAuthenticated: isSupabaseConfigured ? Boolean(email) : true,
       async signIn(e, p) {
         if (!supabase) return
@@ -63,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut()
       },
     }),
-    [ready, email],
+    [ready, email, name, avatarUrl],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

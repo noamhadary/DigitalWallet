@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext'
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 import { CardTile } from '../components/CardTile'
 import { CARD_TYPES, type CardType } from '../lib/types'
 
 export function WalletPage() {
   const { cards, loading, error } = useWallet()
   const { resolved, setPref } = useTheme()
+  const { avatarUrl, name, email } = useAuth()
   const [filter, setFilter] = useState<CardType | 'all'>('all')
   const [query, setQuery] = useState('')
 
@@ -29,9 +31,19 @@ export function WalletPage() {
   return (
     <div className="page">
       <header className="page__header">
-        <div>
-          <h1 className="headline">הארנק שלי</h1>
-          <p className="muted">{cards.length} כרטיסים</p>
+        <div className="wallet-title">
+          {avatarUrl && (
+            <img
+              className="wallet-avatar"
+              src={avatarUrl}
+              alt={name ?? email ?? 'תמונת פרופיל'}
+              referrerPolicy="no-referrer"
+            />
+          )}
+          <div>
+            <h1 className="headline">הארנק שלי</h1>
+            <p className="muted">{cards.length} כרטיסים</p>
+          </div>
         </div>
         <div className="page__header-actions">
           <button

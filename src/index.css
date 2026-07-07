@@ -784,6 +784,18 @@ a {
 
 .page__header-actions { display: flex; align-items: center; gap: 4px; }
 
+/* כותרת הארנק עם תמונת פרופיל */
+.wallet-title { display: flex; align-items: center; gap: var(--sm); min-width: 0; }
+.wallet-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-full);
+  object-fit: cover;
+  border: 2px solid var(--surface-container-lowest);
+  box-shadow: var(--shadow-1);
+  flex: 0 0 auto;
+}
+
 /* גלריית תמונות בעמוד הכרטיס */
 .detail__photos { display: flex; flex-direction: column; gap: var(--sm); margin-bottom: var(--md); }
 .detail__photos .detail__photo {
