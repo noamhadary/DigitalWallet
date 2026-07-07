@@ -260,11 +260,10 @@ export function CardScanner({ cardType, onDone, onClose }: Props) {
               </button>
             )}
             <label className="btn btn--ghost btn--block">
-              🖼️ העלאת תמונה
+              🖼️ העלאת תמונה מהגלריה
               <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 hidden
                 onChange={(e) => onFile(e.target.files?.[0])}
               />
