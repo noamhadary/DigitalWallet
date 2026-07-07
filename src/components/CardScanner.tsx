@@ -8,19 +8,27 @@ import {
   type Corners,
   type Point,
 } from '../lib/imageScan'
+import { scanCardText, type ExtractedInfo } from '../lib/ocr'
+import type { CardType } from '../lib/types'
 
 type Stage = 'capture' | 'adjust' | 'preview'
 
 interface Props {
-  onDone: (dataUrl: string) => void
+  cardType: CardType
+  onDone: (dataUrl: string, extracted?: ExtractedInfo) => void
   onClose: () => void
 }
 
-/** סורק כרטיסים: צילום/העלאה → כוונון פינות → יישור פרספקטיבה → תמונה חתוכה */
-export function CardScanner({ onDone, onClose }: Props) {
+/** סורק כרטיסים: צילום/העלאה → זיהוי גבולות אוטומטי → יישור פרספקטיבה → OCR למילוי שדות */
+export function CardScanner({ cardType, onDone, onClose }: Props) {
   const [stage, setStage] = useState<Stage>('capture')
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<string | null>(null)
+
+  // OCR
+  const [ocrBusy, setOcrBusy] = useState(false)
+  const [ocrProgress, setOcrProgress] = useState(0)
+  const [ocrInfo, setOcrInfo] = useState<ExtractedInfo | null>(null)
 
   // מצלמה חיה
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -184,12 +192,37 @@ export function CardScanner({ onDone, onClose }: Props) {
     setDragIdx(null)
   }
 
-  // ---------- יישור וחיתוך ----------
+  // ---------- יישור, חיתוך ו־OCR ----------
   function confirmCrop() {
     if (!sourceCanvasRef.current || !corners) return
     const warped = warpToCard(sourceCanvasRef.current, corners)
-    setResult(warped.toDataURL('image/jpeg', 0.85))
+    const url = warped.toDataURL('image/jpeg', 0.85)
+    setResult(url)
     setStage('preview')
+    runOcr(url)
+  }
+
+  async function runOcr(url: string) {
+    setOcrBusy(true)
+    setOcrProgress(0)
+    setOcrInfo(null)
+    try {
+      const info = await scanCardText(url, cardType, (p) => setOcrProgress(p))
+      setOcrInfo(info)
+    } catch {
+      // אם ה־OCR נכשל — התמונה עדיין נשמרת, פשוט בלי מילוי אוטומטי
+    } finally {
+      setOcrBusy(false)
+    }
+  }
+
+  /** סיכום קצר של השדות שזוהו */
+  function ocrSummary(info: ExtractedInfo): string[] {
+    const out: string[] = []
+    if (info.holderName) out.push(`שם: ${info.holderName}`)
+    if (info.cardNumber) out.push(`מספר: ${info.cardNumber}`)
+    for (const [k, v] of Object.entries(info.details)) out.push(`${labelFor(k)}: ${v}`)
+    return out
   }
 
   return (
@@ -243,7 +276,7 @@ export function CardScanner({ onDone, onClose }: Props) {
       {/* שלב 2 — כוונון פינות */}
       {stage === 'adjust' && (
         <div className="scanner__adjust">
-          <p className="scanner__hint">גרור את ארבע הפינות לקצוות הכרטיס. המערכת תיישר ותחתוך אוטומטית.</p>
+          <p className="scanner__hint">✓ גבולות הכרטיס זוהו אוטומטית. אפשר לגרור את הפינות לדיוק, או לצלם מחדש.</p>
           <div className="scanner__canvas-wrap">
             <canvas
               ref={overlayRef}
@@ -260,17 +293,62 @@ export function CardScanner({ onDone, onClose }: Props) {
         </div>
       )}
 
-      {/* שלב 3 — תצוגה מקדימה */}
+      {/* שלב 3 — תצוגה מקדימה + זיהוי טקסט */}
       {stage === 'preview' && result && (
         <div className="scanner__preview">
-          <p className="scanner__hint">כך ייראה הכרטיס. אפשר לשמור או לחתוך מחדש.</p>
           <img src={result} alt="כרטיס חתוך" className="scanner__result" />
+
+          {ocrBusy && (
+            <div className="ocr-box">
+              <div className="ocr-box__title">🔎 מזהה פרטים על הכרטיס…</div>
+              <div className="ocr-bar">
+                <div className="ocr-bar__fill" style={{ width: `${Math.round(ocrProgress * 100)}%` }} />
+              </div>
+            </div>
+          )}
+
+          {!ocrBusy && ocrInfo && ocrSummary(ocrInfo).length > 0 && (
+            <div className="ocr-box ocr-box--ok">
+              <div className="ocr-box__title">✓ זוהו פרטים — ימולאו בשדות</div>
+              <ul className="ocr-list">
+                {ocrSummary(ocrInfo).map((s, i) => (
+                  <li key={i} dir="auto">{s}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {!ocrBusy && ocrInfo && ocrSummary(ocrInfo).length === 0 && (
+            <div className="ocr-box">לא זוהו פרטים אוטומטית — אפשר למלא ידנית.</div>
+          )}
+
           <div className="scanner__actions">
             <button className="btn btn--ghost" onClick={() => setStage('adjust')}>חזרה לכוונון</button>
-            <button className="btn btn--primary" onClick={() => onDone(result)}>שמירת התמונה</button>
+            <button
+              className="btn btn--primary"
+              disabled={ocrBusy}
+              onClick={() => onDone(result, ocrInfo ?? undefined)}
+            >
+              {ocrBusy ? 'מזהה…' : 'שמירה ומילוי שדות'}
+            </button>
           </div>
         </div>
       )}
     </div>
   )
+}
+
+/** תוויות בעברית למפתחות השדות שזוהו */
+function labelFor(key: string): string {
+  const map: Record<string, string> = {
+    idNumber: 'ת.ז',
+    dateOfBirth: 'תאריך לידה',
+    issueDate: 'תאריך הנפקה',
+    licenseNumber: 'מספר רשיון',
+    validUntil: 'בתוקף עד',
+    expiry: 'תוקף',
+    network: 'רשת',
+    categories: 'דרגות',
+  }
+  return map[key] ?? key
 }

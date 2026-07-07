@@ -628,6 +628,31 @@ a {
 .auth__brand p { color: var(--on-surface-variant); margin: 0; font-size: 14px; }
 .auth__form { display: flex; flex-direction: column; gap: var(--md); }
 
+/* כפתור התחברות עם Google */
+.btn--google {
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  gap: 10px;
+}
+.btn--google:hover { background: var(--surface-container-low); }
+
+/* מפריד "או" */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sm);
+  color: var(--on-surface-variant);
+  font-size: 12px;
+}
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--outline-variant);
+}
+
 /* ============================================================
    Alerts + bottom sheet
    ============================================================ */
@@ -892,3 +917,43 @@ a {
 }
 .scanner .btn--ghost { color: #c5c6ca; }
 .scanner .btn--ghost:hover { background: rgba(255, 255, 255, 0.08); }
+
+/* OCR — תיבת זיהוי פרטים */
+.ocr-box {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-md);
+  padding: var(--md);
+  color: #e4e2e2;
+  font-size: 14px;
+}
+.ocr-box--ok { border-color: rgba(193, 199, 203, 0.5); }
+.ocr-box__title { font-weight: 600; margin-bottom: var(--sm); }
+.ocr-list { margin: 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 4px; }
+.ocr-list li { font-size: 13px; color: #c5c6ca; }
+.ocr-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.ocr-bar__fill {
+  height: 100%;
+  background: #c1c7cb;
+  border-radius: var(--r-full);
+  transition: width 0.2s ease;
+}
+
+/* מסגרת מכוונת לסריקת ברקוד */
+.barcode-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 78%;
+  height: 34%;
+  border: 2px solid rgba(193, 199, 203, 0.9);
+  border-radius: var(--r-md);
+  box-shadow: 0 0 0 100vmax rgba(15, 16, 17, 0.5);
+  pointer-events: none;
+}

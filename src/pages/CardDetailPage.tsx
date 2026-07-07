@@ -2,15 +2,17 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext'
 import { Barcode } from '../components/Barcode'
+import { BarcodeScanner } from '../components/BarcodeScanner'
 import { getCardTypeMeta } from '../lib/types'
 import { formatCardNumber } from '../lib/validators'
 
 export function CardDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { cards, deleteCard, toggleFavorite } = useWallet()
+  const { cards, deleteCard, toggleFavorite, updateCard } = useWallet()
   const card = useMemo(() => cards.find((c) => c.id === id), [cards, id])
   const [confirming, setConfirming] = useState(false)
+  const [scanningBarcode, setScanningBarcode] = useState(false)
 
   if (!card) {
     return (
@@ -34,6 +36,23 @@ export function CardDetailPage() {
   async function onDelete() {
     await deleteCard(card!.id)
     navigate('/')
+  }
+
+  /** מעדכן את מספר הכרטיס מתוך ערך ברקוד שנסרק */
+  async function onBarcodeScanned(value: string) {
+    const clean = value.trim()
+    setScanningBarcode(false)
+    if (!card || !clean) return
+    const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = card
+    if (card.type === 'id') {
+      await updateCard(card.id, {
+        ...rest,
+        barcodeData: clean,
+        details: { ...card.details, idNumber: clean },
+      })
+    } else {
+      await updateCard(card.id, { ...rest, barcodeData: clean, cardNumber: clean })
+    }
   }
 
   return (
@@ -94,6 +113,13 @@ export function CardDetailPage() {
         </section>
       )}
 
+      {/* סריקת ברקוד למשיכת מספר הכרטיס */}
+      <section className="card-surface scan-barcode">
+        <button className="btn btn--block scan-btn" onClick={() => setScanningBarcode(true)}>
+          📷 סריקת ברקוד — משיכת {card.type === 'id' ? 'מספר ת.ז' : 'מספר הכרטיס'}
+        </button>
+      </section>
+
       {/* פרטים */}
       {detailEntries.length > 0 && (
         <section className="card-surface info">
@@ -126,6 +152,10 @@ export function CardDetailPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {scanningBarcode && (
+        <BarcodeScanner onResult={onBarcodeScanned} onClose={() => setScanningBarcode(false)} />
       )}
     </div>
   )

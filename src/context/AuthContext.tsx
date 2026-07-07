@@ -8,6 +8,7 @@ interface AuthState {
   isAuthenticated: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -47,6 +48,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async signUp(e, p) {
         if (!supabase) return
         const { error } = await supabase.auth.signUp({ email: e, password: p })
+        if (error) throw new Error(translateAuthError(error.message))
+      },
+      async signInWithGoogle() {
+        if (!supabase) return
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: { redirectTo: window.location.origin },
+        })
         if (error) throw new Error(translateAuthError(error.message))
       },
       async signOut() {

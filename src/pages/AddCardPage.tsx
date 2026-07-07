@@ -4,8 +4,14 @@ import { useWallet } from '../context/WalletContext'
 import { CARD_TYPES, getCardTypeMeta, type BarcodeFormat, type CardInput, type CardType } from '../lib/types'
 import { isValidIsraeliId } from '../lib/validators'
 import { CardScanner } from '../components/CardScanner'
+import type { ExtractedInfo } from '../lib/ocr'
 
-const COLORS = ['#595f63', '#695b55', '#44474a', '#4a5560', '#5a6b5e', '#767779', '#5d5e60', '#3d4348']
+const COLORS = [
+  '#595f63', '#44474a', '#3d4348', '#5d5e60', '#4a5560', '#767779',
+  '#3d4e6b', '#2f3e46', '#34506b', '#1f3a5f',
+  '#5a6b5e', '#3a5a40', '#2c5f5a', '#40655a',
+  '#695b55', '#5b4636', '#7a5c3a', '#8a4b4b', '#6a4c4c', '#4a3f5e', '#5e4b6b',
+]
 
 export function AddCardPage() {
   const { id } = useParams()
@@ -54,6 +60,21 @@ export function AddCardPage() {
     setType(t)
     setFrontColor(getCardTypeMeta(t).color)
     if (!title) setTitle(getCardTypeMeta(t).label)
+  }
+
+  /** ממלא שדות ריקים מתוך התוצאות שזוהו ב־OCR (לא דורס ערכים קיימים) */
+  function applyExtracted(info: ExtractedInfo) {
+    if (info.holderName && !holderName.trim()) setHolderName(info.holderName)
+    if (info.cardNumber && !cardNumber.trim()) setCardNumber(info.cardNumber)
+    if (info.details && Object.keys(info.details).length) {
+      setDetails((prev) => {
+        const next = { ...prev }
+        for (const [k, v] of Object.entries(info.details)) {
+          if (v && !next[k]?.trim()) next[k] = v
+        }
+        return next
+      })
+    }
   }
 
   const idInvalid =
@@ -252,10 +273,12 @@ export function AddCardPage() {
 
       {scanning && (
         <CardScanner
+          cardType={type}
           onClose={() => setScanning(null)}
-          onDone={(url) => {
+          onDone={(url, extracted) => {
             if (scanning === 'front') setImageData(url)
             else setImageBackData(url)
+            if (extracted) applyExtracted(extracted)
             setScanning(null)
           }}
         />
