@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { storage } from '../lib/storage'
 import type { CardInput, WalletCard } from '../lib/types'
-import { useAuth } from './AuthContext'
 
 interface WalletState {
   cards: WalletCard[]
@@ -17,7 +16,6 @@ interface WalletState {
 const WalletContext = createContext<WalletState | null>(null)
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated, ready } = useAuth()
   const [cards, setCards] = useState<WalletCard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -35,14 +33,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!ready) return
-    if (isAuthenticated) {
-      refresh()
-    } else {
-      setCards([])
-      setLoading(false)
-    }
-  }, [ready, isAuthenticated, refresh])
+    refresh()
+  }, [refresh])
 
   const addCard = useCallback(async (input: CardInput) => {
     const card = await storage.create(input)

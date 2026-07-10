@@ -166,14 +166,6 @@ a {
   overflow-x: hidden;
 }
 
-.splash {
-  min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  color: var(--on-surface-variant);
-  width: 100%;
-}
-
 /* ============================================================
    Page
    ============================================================ */
@@ -637,62 +629,6 @@ a {
 .bottom-nav__icon svg { display: block; }
 
 /* ============================================================
-   Auth
-   ============================================================ */
-.auth {
-  width: 100%;
-  max-width: 440px;
-  min-height: 100dvh;
-  background: var(--surface);
-  padding: var(--xl) var(--lg);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--xl);
-}
-.auth__brand { text-align: center; }
-.auth__logo {
-  width: 92px;
-  height: 92px;
-  margin: 0 auto var(--md);
-  display: grid;
-  place-items: center;
-  color: var(--primary);
-  background: var(--secondary-container);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow-1);
-}
-.auth__logo svg { display: block; }
-.auth__brand h1 { font-size: 26px; margin: 0 0 var(--sm); }
-.auth__brand p { color: var(--on-surface-variant); margin: 0; font-size: 14px; }
-.auth__form { display: flex; flex-direction: column; gap: var(--md); }
-
-/* כפתור התחברות עם Google */
-.btn--google {
-  background: var(--surface-container-lowest);
-  color: var(--on-surface);
-  border: 1px solid var(--outline-variant);
-  gap: 10px;
-}
-.btn--google:hover { background: var(--surface-container-low); }
-
-/* מפריד "או" */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: var(--sm);
-  color: var(--on-surface-variant);
-  font-size: 12px;
-}
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--outline-variant);
-}
-
-/* ============================================================
    Alerts + bottom sheet
    ============================================================ */
 .alert {
@@ -829,11 +765,36 @@ a {
   width: 44px;
   height: 44px;
   border-radius: var(--r-full);
-  object-fit: cover;
   border: 2px solid var(--surface-container-lowest);
   box-shadow: var(--shadow-1);
   flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--secondary-container);
+  color: var(--on-surface-variant);
+  font-size: 22px;
 }
+.wallet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* עריכת פרופיל בהגדרות */
+.profile-edit { display: flex; align-items: center; gap: var(--md); }
+.profile-edit__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--r-full);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--secondary-container);
+  color: var(--on-surface-variant);
+  font-size: 30px;
+  flex: 0 0 auto;
+  box-shadow: var(--shadow-1);
+}
+.profile-edit__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.profile-edit__actions { display: flex; gap: var(--sm); flex: 1; flex-wrap: wrap; }
+.profile-edit__actions .btn { flex: 1; }
 
 /* כרטיס מתהפך (חזית/גב) */
 .flip {

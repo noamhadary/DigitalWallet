@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useWallet } from '../context/WalletContext'
 import { useTheme } from '../context/ThemeContext'
-import { useAuth } from '../context/AuthContext'
+import { useProfile } from '../context/ProfileContext'
 import { CardCarousel } from '../components/CardCarousel'
 import { CARD_TYPES, type CardType } from '../lib/types'
 
 export function WalletPage() {
   const { cards, loading, error } = useWallet()
   const { resolved, setPref } = useTheme()
-  const { avatarUrl, name, email } = useAuth()
+  const { profile } = useProfile()
   const [filter, setFilter] = useState<CardType | 'all'>('all')
   const [query, setQuery] = useState('')
 
@@ -32,16 +32,15 @@ export function WalletPage() {
     <div className="page">
       <header className="page__header">
         <div className="wallet-title">
-          {avatarUrl && (
-            <img
-              className="wallet-avatar"
-              src={avatarUrl}
-              alt={name ?? email ?? 'תמונת פרופיל'}
-              referrerPolicy="no-referrer"
-            />
-          )}
+          <Link to="/settings" className="wallet-avatar" aria-label="פרופיל">
+            {profile.avatar ? (
+              <img src={profile.avatar} alt="תמונת פרופיל" />
+            ) : (
+              <span aria-hidden>👤</span>
+            )}
+          </Link>
           <div>
-            <h1 className="headline">הארנק שלי</h1>
+            <h1 className="headline">{profile.name ? `הארנק של ${profile.name}` : 'הארנק שלי'}</h1>
             <p className="muted">{cards.length} כרטיסים</p>
           </div>
         </div>
